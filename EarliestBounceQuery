@@ -1,0 +1,22 @@
+select Year(tbl_data.bnc_dt) as year, MONTH(tbl_data.bnc_dt) as month, COUNT (*)  from 
+(select email, MIN(lbd) as bnc_dt from
+
+(
+
+select a.*,b.*, 'G' as acct from 
+(select AMF_id as id_no, MIN(timestampd) as lbd from dbo.event_GE where event_id = 32
+GROUP BY AMF_id) as a
+INNER JOIN dbo.emails_ge as b
+ON a.id_no = b.AMF_id
+UNION
+select a.*,b.*, 'I' as acct from 
+(select AMF_id as id_no, MIN(timestampd) as lbd from dbo.event_IG where event_id = 32
+GROUP BY AMF_id) as a
+INNER JOIN dbo.email_ig as b
+ON a.id_no = b.AMF_id
+
+) as zzz
+group by email) as tbl_data
+GROUP BY
+Year(tbl_data.bnc_dt), MONTH(tbl_data.bnc_dt)
+ORDER BY Year(tbl_data.bnc_dt), MONTH(tbl_data.bnc_dt)
