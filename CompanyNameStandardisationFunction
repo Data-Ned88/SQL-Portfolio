@@ -1,0 +1,81 @@
+CREATE FUNCTION dbo.big_org_stand
+(
+    @nstring varchar(120)
+)
+RETURNS varchar(120)
+AS
+BEGIN
+
+    DECLARE @Result varchar(120)
+    SET @Result = ''
+
+    DECLARE @nchar varchar(1)
+    DECLARE @position int
+
+    SET @position = 1
+    WHILE @position <= LEN(@nstring)
+    BEGIN
+        SET @nchar = SUBSTRING(@nstring, @position, 1)
+        IF @nchar LIKE '[A-Za-z0-9&]'
+            SET @Result = @Result + @nchar
+		ELSE SET @Result = @Result + ' '
+        SET @position = @position + 1
+    END
+	
+	SET @Result = REPLACE(@Result, '   ',' ')
+	SET @Result = REPLACE(@Result, '  ',' ')
+	SET @Result = REPLACE(@Result, ' and ',' & ')
+	SET @Result = REPLACE(@Result, ' uk ',' ')
+	SET @Result = REPLACE(@Result, ' emea ',' ')
+	IF @Result LIKE 'The University of %' 
+		SET @Result = REPLACE(@Result, 'The University of ','') + ' University'
+		ELSE SET @Result = @Result
+	IF @Result LIKE 'University of %' 
+		SET @Result = REPLACE(@Result, 'University of ','') + ' University'
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% Limited' 
+		SET @Result = LEFT(@Result,DATALENGTH(@Result)-8)
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% Ltd' 
+		SET @Result = LEFT(@Result,DATALENGTH(@Result)-4)
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% Llp' 
+		SET @Result = LEFT(@Result,DATALENGTH(@Result)-4)
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% plc' 
+		SET @Result = LEFT(@Result,DATALENGTH(@Result)-4)
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% gmbh' 
+		SET @Result = LEFT(@Result,DATALENGTH(@Result)-5)
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% Clinical Commissioning Group' 
+		SET @Result = REPLACE(@Result, ' Clinical Commissioning Group',' CCG')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '%Church of England%' 
+		SET @Result = REPLACE(@Result, 'Church of England','ce')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% C of E %' 
+		SET @Result = REPLACE(@Result, ' C of E ',' ce ')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% roman catholic %' 
+		SET @Result = REPLACE(@Result, ' roman catholic ',' rc ')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% catholic %' 
+		SET @Result = REPLACE(@Result, ' catholic ',' rc ')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% voluntary aided %' 
+		SET @Result = REPLACE(@Result, ' voluntary aided ',' va ')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% voluntary controlled %' 
+		SET @Result = REPLACE(@Result, ' voluntary controlled ',' vc ')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% pupil referral unit' 
+		SET @Result = REPLACE(@Result, ' pupil referral unit',' pru')
+		ELSE SET @Result = @Result
+	IF @Result LIKE '% sixth form%' 
+		SET @Result = REPLACE(@Result, ' sixth form',' 6th form')
+		ELSE SET @Result = @Result
+	SET @Result = REPLACE(@Result,' ','')
+    RETURN @Result
+
+END
