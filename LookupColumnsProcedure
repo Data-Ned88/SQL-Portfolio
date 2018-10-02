@@ -1,0 +1,19 @@
+CREATE PROCEDURE dbo.spPopulateSectoringColumns
+@tblName nvarchar(50),
+@clPcode nvarchar(50),
+@clCoName nvarchar(50),
+@clJobTitle nvarchar(50),
+@clEmail nvarchar(50)
+AS
+BEGIN
+
+DECLARE @Sqlquery nvarchar(max)
+SET @Sqlquery = '
+
+UPDATE ' + @tblName + ' SET suffix = RIGHT(' + @clEmail + ', LEN(' + @clEmail + ')-CHARINDEX(''@'', ' + @clEmail + ' ));
+UPDATE ' + @tblName + ' SET standorg = dbo.big_org_stand(' + @clCoName + ');
+UPDATE ' + @tblName + ' SET small_org = dbo.small_org_stand(' + @clCoName + ' , ' + @clPcode + ');
+UPDATE ' + @tblName + ' SET jtsearch = dbo.RemoveNonASCII(' + @clJobTitle + ');'
+EXECUTE sp_executesql @Sqlquery
+
+END
