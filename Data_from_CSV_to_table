@@ -1,0 +1,36 @@
+CREATE PROCEDURE spTransactionProcedure
+( @Filepath nvarchar(MAX) )
+AS
+BEGIN
+
+create table dbo.testa (eventid varchar(40), timestampd varchar(40),
+amf_id varchar(40),
+campaign_id varchar(40),
+projectid varchar(40),
+workspaceid varchar(40))
+
+Declare @SQLQ nvarchar(max)
+SET @SQLQ ='bulk insert dbo.testa from ' + '''' + @Filepath + '''' +
+			' with ( FIELDTERMINATOR ='','', FIRSTROW = 2 )'
+
+EXECUTE sp_executesql @SQLQ
+BEGIN TRY
+BEGIN TRANSACTION
+insert into dbo.ades ([event_id], timestampd, amf_id, campaign_id, projectid, workspaceid)
+select
+convert(smallint, eventid) as event_id,
+convert(datetime, timestampd,20) as timestampd,
+convert(int, [amf_id]) as amf_id,
+convert(int, [campaign_id]) as campaign_id,
+convert(int, [projectid]) as projectid,
+convert(int, [workspaceid]) as workspaceid from dbo.testa
+COMMIT
+END TRY
+BEGIN CATCH
+	SELECT ERROR_LINE(), ERROR_MESSAGE()
+	ROLLBACK
+END CATCH
+
+drop table dbo.testa
+
+END
